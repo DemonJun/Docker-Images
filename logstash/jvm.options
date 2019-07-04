@@ -1,8 +1,8 @@
 ## JVM configuration
 
 ## GC configuration
--XX:+UseG1GC
--XX:InitiatingHeapOccupancyPercent=75
+# -XX:+UseG1GC
+# -XX:InitiatingHeapOccupancyPercent=75
 
 
 # Set the locale variant, if any
