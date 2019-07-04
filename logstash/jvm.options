@@ -1,0 +1,31 @@
+## JVM configuration
+
+## GC configuration
+-XX:+UseG1GC
+-XX:InitiatingHeapOccupancyPercent=75
+
+
+# Set the locale variant, if any
+#-Duser.variant=
+
+## basic
+
+# set the I/O temp directory
+#-Djava.io.tmpdir=$HOME
+
+# set to headless, just in case
+-Djava.awt.headless=true
+
+# ensure UTF-8 encoding by default (e.g. filenames)
+-Dfile.encoding=UTF-8
+
+# use our provided JNA always versus the system one
+#-Djna.nosys=true
+
+# Turn on JRuby invokedynamic
+-Djruby.compile.invokedynamic=true
+# Force Compilation
+-Djruby.jit.threshold=0
+
+# Entropy source for randomness
+-Djava.security.egd=file:/dev/urandom
