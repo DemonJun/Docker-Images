@@ -12,7 +12,7 @@ RUN git checkout 3.45.0
 
 RUN gradle wrapper --gradle-version=5.6.4
 
-RUN ./gradlew build installDist
+RUN ./gradlew installDist
 
 WORKDIR /opt/azkaban/azkaban-solo-server/build/install/azkaban-solo-server
 
