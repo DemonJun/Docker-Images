@@ -7,9 +7,9 @@ RUN yum update -y && \
     yum install openssh-server openssh-client supervisor vim wget net-tools lrzsz git unzip zip gcc-c++ pcre pcre-devel zlib zlib-devel openssl openssl-devel p7zip p7zip-plugins -y && \
     yum clean all
 
-COPY ssh.ini /etc/supervisord.d
-COPY change_root_passwd.sh /root
-COPY ssh_* /etc/ssh
+COPY ./ssh.ini /etc/supervisord.d
+COPY ./change_root_passwd.sh /root
+COPY ./ssh_* /etc/ssh
 
 RUN sh /root/change_root_passwd.sh && \
     sed -i "s/UsePAM yes/#UsePAM no/g" /etc/ssh/sshd_config && \
