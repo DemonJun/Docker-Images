@@ -9,7 +9,9 @@ RUN sed -ie 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' /etc/locale.gen \
     pacman -Sy --noconfirm --needed git openssh sudo && \
     groupadd demon && useradd -mg demon demon && \
     echo -e "123456\n123456" | passwd root && \
+    echo -e "123456\n123456" | passwd demon && \
     echo "demon ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/demon && \
+    rm -f /etc/ssh/ssh_*_key &&\
     ssh-keygen -A && \
     sed -i \
     -e 's/^#*\(PermitRootLogin\) .*/\1 yes/' \
@@ -36,10 +38,13 @@ RUN git clone https://aur.archlinux.org/yay.git && \
     git clone https://github.com/esc/conda-zsh-completion ${ZSH_CUSTOM:=~/.oh-my-zsh/custom}/plugins/conda-zsh-completion && \
     sed -i '/^plugins=/cplugins=(git sudo docker zsh-completions zsh-history-substring-search zsh-autosuggestions zsh-syntax-highlighting conda-zsh-completion extract)' ~/.zshrc && \
     echo "autoload -U compinit && compinit" >> ~/.zshrc && \
-    echo "123456" | chsh -s /bin/zsh && \
-    pacman -Scc && \
+    echo "123456" | chsh -s /bin/zsh 
+
+RUN sudo ln -s /opt/miniconda3/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
+    sudo ln -s /opt/miniconda3/etc/profile.d/conda.zsh /etc/profile.d/conda.zsh && \
+    sudo pacman -Scc --noconfirm && \
     rm -rf .cache
 
 EXPOSE 22
 
-ENTRYPOINT [ "/usr/sbin/sshd"]
+ENTRYPOINT [ "sudo", "/usr/bin/sshd", "-D"]
