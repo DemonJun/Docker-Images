@@ -1,3 +1,0 @@
-FROM elasticsearch:7.7.0
-LABEL maintainer=demonjun<demonjun@foxmail.com>
-ADD jvm.options /usr/share/elasticsearch/config/jvm.options
