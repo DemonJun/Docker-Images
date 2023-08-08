@@ -5,9 +5,13 @@ LABEL maintainer="demonjun@foxmail.com"
 RUN sed -ie 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' /etc/locale.gen \
     && locale-gen && \
     sed -i '1 i\Server = https://mirrors.cloud.tencent.com/archlinux/$repo/os/$arch' /etc/pacman.d/mirrorlist && \
-    pacman -Syu --noconfirm && \
-    pacman -Sy --noconfirm --needed git openssh sudo && \
-    groupadd demon && useradd -mg demon demon && \
+    echo -e "[archlinuxcn]\nServer = https://mirrors.ustc.edu.cn/archlinuxcn/\$arch" >> /etc/pacman.conf && \
+    pacman-key --init && \
+    pacman-key --populate && \
+    echo "Y" | pacman -Sy archlinuxcn-keyring --noconfirm && \
+    pacman -Syu --noconfirm --needed git openssh sudo yay 
+
+RUN groupadd demon && useradd -mg demon demon && \
     echo -e "123456\n123456" | passwd root && \
     echo -e "123456\n123456" | passwd demon && \
     echo "demon ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/demon && \
