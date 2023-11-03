@@ -2,16 +2,21 @@ FROM archlinux:base-devel
 
 LABEL maintainer="demonjun@foxmail.com"
 
+USER root
+WORKDIR /root
+
 RUN sed -ie 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' /etc/locale.gen \
     && locale-gen && \
-    sed -i '1 i\Server = https://mirrors.cloud.tencent.com/archlinux/$repo/os/$arch' /etc/pacman.d/mirrorlist && \
+    echo -e "Server = https://mirrors.ustc.edu.cn/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist && \
     echo -e "[archlinuxcn]\nServer = https://mirrors.ustc.edu.cn/archlinuxcn/\$arch" >> /etc/pacman.conf && \
     pacman-key --init && \
     pacman-key --populate && \
     echo "Y" | pacman -Sy archlinuxcn-keyring --noconfirm && \
-    pacman -Syu --noconfirm --needed git openssh sudo yay 
+    pacman -Syu --noconfirm --needed curl wget git openssh sudo yay vim fish bash-completion && \
+    chsh -s /usr/bin/fish
 
-RUN groupadd demon && useradd -mg demon demon && \
+# enable ssh
+RUN groupadd demon && useradd -mg root demon && \
     echo -e "123456\n123456" | passwd root && \
     echo -e "123456\n123456" | passwd demon && \
     echo "demon ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/demon && \
@@ -25,27 +30,30 @@ RUN groupadd demon && useradd -mg demon demon && \
     /etc/ssh/sshd_config && \
     systemctl enable sshd
 
-USER demon
-WORKDIR /home/demon
+# install asdf
+RUN git clone https://ghproxy.com/https://github.com/asdf-vm/asdf.git /opt/asdf --branch master && \
+    echo ". /opt/asdf/asdf.sh" >> ~/.bashrc && \
+    echo "source /opt/asdf/plugins/java/set-java-home.bash" >> ~/.bashrc && \
+    echo "source /opt/asdf/asdf.fish" >> ~/.config/fish/config.fish && \
+    echo "source /opt/asdf/plugins/java/set-java-home.fish" >> ~/.config/fish/config.fish && \
+    mkdir -p ~/.config/fish/completions; and ln -s /opt/asdf/completions/asdf.fish ~/.config/fish/completions
+ 
+COPY asdfrc ~/.asdfrc   
 
-RUN git clone https://aur.archlinux.org/yay.git && \
-    cd yay && makepkg -sri --needed --noconfirm && \
-    cd ../ && rm -rf yay && \
-    yay --aururl "https://aur.tuna.tsinghua.edu.cn" --save && \
-    yay -Sy jdk-adoptopenjdk jdk8-adoptopenjdk --needed --noconfirm && \
-    yay -Sy maven docker miniconda3 zsh vim zsh --needed --noconfirm && \
-    echo "Y"| sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)" && \
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting && \
-    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions && \
-    git clone https://github.com/zsh-users/zsh-history-substring-search ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search && \
-    git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:=~/.oh-my-zsh/custom}/plugins/zsh-completions && \
-    git clone https://github.com/esc/conda-zsh-completion ${ZSH_CUSTOM:=~/.oh-my-zsh/custom}/plugins/conda-zsh-completion && \
-    sed -i '/^plugins=/cplugins=(git sudo docker zsh-completions zsh-history-substring-search zsh-autosuggestions zsh-syntax-highlighting conda-zsh-completion extract)' ~/.zshrc && \
-    echo "autoload -U compinit && compinit" >> ~/.zshrc && \
-    echo "123456" | chsh -s /bin/zsh
+# asdf install nodejs java maven
+RUN asdf plugin add java; asdf plugin add maven; asdf plugin add nodejs; \
+    asdf install nodejs 21.1.0; \
+    asdf install java temurin-21.0.1+12.0.LTS; \
+    asdf install java temurin-17.0.9+9; \
+    asdf install java temurin-11.0.21+9; \
+    asdf install maven 3.9.5; \
+    asdf global java temurin-11.0.21+9; \
+    asdf global maven 3.9.5; \
+    asdf global nodejs 21.1.0
 
-RUN sudo ln -s /opt/miniconda3/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    sudo ln -s /opt/miniconda3/etc/profile.d/conda.zsh /etc/profile.d/conda.zsh && \
+# install docker 
+RUN yay --aururl "https://mirrors.ustc.edu.cn/archlinuxcn" --save && \
+    yay -Sy docker docker-compose --needed --noconfirm && \
     sudo pacman -Scc --noconfirm && \
     rm -rf .cache
 
