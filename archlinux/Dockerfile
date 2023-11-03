@@ -1,4 +1,4 @@
-FROM archlinux:base-devel
+FROM archlinux
 
 LABEL maintainer="demonjun@foxmail.com"
 
@@ -12,7 +12,7 @@ RUN sed -ie 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' /etc/locale.gen \
     pacman-key --init && \
     pacman-key --populate && \
     echo "Y" | pacman -Sy archlinuxcn-keyring --noconfirm && \
-    pacman -Syu --noconfirm --needed curl wget git openssh sudo yay vim fish bash-completion && \
+    pacman -Syu --noconfirm --needed base-devel curl wget git openssh sudo yay vim fish bash-completion && \
     chsh -s /usr/bin/fish
 
 # enable ssh
