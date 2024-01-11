@@ -8,11 +8,12 @@ USER root
 WORKDIR /root
 
 RUN echo -e "Server = https://mirrors.ustc.edu.cn/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist && \
-    pacman -Syyu --noconfirm && \
+    pacman -Syyu archlinux-keyring --noconfirm && \
     pacman-key --init && \
     pacman-key --populate 
 
 RUN echo -e "[archlinuxcn]\nServer = https://mirrors.ustc.edu.cn/archlinuxcn/\$arch" >> /etc/pacman.conf && \
+    pacman-key --lsign farseerfc@archlinux.org && \
     echo "Y" | pacman -Sy archlinuxcn-keyring --noconfirm && \
     pacman -Syu --noconfirm --needed base-devel curl wget git openssh sudo yay vim fish bash-completion rsync
 
@@ -52,12 +53,12 @@ RUN source /opt/asdf/asdf.sh && \
 
 # config asdf in bash and fish
 RUN fish ; \
-    echo ". /opt/asdf/asdf.sh" >> ~/.bashrc && \
-    echo "source ~/.asdf/plugins/java/set-java-home.bash" >> ~/.bashrc && \
-    echo "source /opt/asdf/asdf.fish" >> ~/.config/fish/config.fish && \
-    echo "source ~/.asdf/plugins/java/set-java-home.fish" >> ~/.config/fish/config.fish && \
-    mkdir -p ~/.config/fish/completions && \
-    ln -s /opt/asdf/completions/asdf.fish ~/.config/fish/completions/asdf.fish
+    echo ". /opt/asdf/asdf.sh" >> /root/.bashrc && \
+    echo "source /root/.asdf/plugins/java/set-java-home.bash" >> /root/.bashrc && \
+    echo "source /opt/asdf/asdf.fish" >> /root/.config/fish/config.fish && \
+    echo "source /root/.asdf/plugins/java/set-java-home.fish" >> /root/.config/fish/config.fish && \
+    mkdir -p /root/.config/fish/completions && \
+    ln -s /opt/asdf/completions/asdf.fish /root/.config/fish/completions/asdf.fish
 
 # install conda
 RUN yay -Sy miniconda --noconfirm
@@ -68,7 +69,7 @@ RUN sudo pacman -Scc --noconfirm && \
 
 COPY set-locale-utf8.sh /opt/scripts/set-locale-utf8.sh
 RUN chmod +x /opt/scripts/*
-COPY asdfrc ~/.asdfrc   
+COPY asdfrc /root/.asdfrc   
 
 EXPOSE 22
 
