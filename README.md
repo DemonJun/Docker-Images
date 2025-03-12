@@ -31,6 +31,13 @@
 
 #### 使用方法
 
+##### 获取镜像
+
+从 DockerHub 拉取：
+```bash
+docker pull demonjun/archlinux-dev:latest
+```
+
 ##### 构建镜像
 
 ```bash
@@ -59,6 +66,15 @@ SSH连接信息：
 
 - `ENABLE_SSH`: 设置为`true`启用SSH服务，默认为`false`
 
+## 自动构建
+
+本仓库使用 GitHub Actions 自动构建并推送 Docker 镜像。每当 `archlinux` 目录中的文件发生变更并推送到 `main` 分支时，或者手动触发工作流时，都会自动构建并推送镜像到 DockerHub。
+
+### 设置自动构建
+
+要启用自动构建，需要在 GitHub 仓库的 Secrets 中设置以下变量：
+
+1. `DOCKERHUB_TOKEN`: DockerHub 的访问令牌，用于推送镜像到 DockerHub
 
 ## 许可证
 

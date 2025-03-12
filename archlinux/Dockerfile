@@ -7,12 +7,11 @@ ENV LANG=en_US.UTF-8
 USER root
 WORKDIR /root
 
-RUN echo -e "Server = https://mirrors.ustc.edu.cn/archlinux/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist && \
-    pacman -Syyu archlinux-keyring --noconfirm && \
+RUN pacman -Syyu archlinux-keyring --noconfirm && \
     pacman-key --init && \
     pacman-key --populate 
 
-RUN echo -e "[archlinuxcn]\nServer = https://mirrors.ustc.edu.cn/archlinuxcn/\$arch" >> /etc/pacman.conf && \
+RUN echo -e "[archlinuxcn]\nServer = https://repo.archlinuxcn.org/\$arch" >> /etc/pacman.conf && \
     pacman-key --lsign farseerfc@archlinux.org && \
     echo "Y" | pacman -Sy archlinuxcn-keyring --noconfirm && \
     pacman -Syu --noconfirm --needed base-devel curl wget git openssh sudo yay vim fish bash-completion rsync xorg xorg-xauth socat
@@ -38,8 +37,7 @@ RUN groupadd demon && useradd -mg root demon && \
     /etc/ssh/sshd_config
 
 # install docker kubectl helm k9s pgcli
-RUN yay --aururl "https://mirrors.ustc.edu.cn/archlinuxcn" --save && \
-    yay -Sy docker docker-compose docker-buildx python python-pip kubectl helm k9s pgcli --needed --noconfirm 
+RUN yay -Sy docker docker-compose docker-buildx python python-pip kubectl helm k9s pgcli --needed --noconfirm 
 
 # install vfox
 RUN curl -sSf https://raw.githubusercontent.com/version-fox/vfox/main/install.sh | bash && \
@@ -55,17 +53,21 @@ RUN vfox install nodejs@23.9.0 ; \
     vfox install java@17.0.14+7-tem ; \
     vfox install java@11.0.26+4-tem
 
+# download vs-code-server
+COPY download-vs-code-server.sh /opt/scripts/download-vs-code-server.sh
+RUN chmod +x /opt/scripts/download-vs-code-server.sh; \
+    /opt/scripts/download-vs-code-server.sh linux
+
 # clean cache
 RUN pacman -Scc --noconfirm && \
     rm -rf .cache    
-
-ADD vscode-server.tgz /root/
 
 # 设置默认 shell 为 fish
 RUN chsh -s /usr/bin/fish root && \
     chsh -s /usr/bin/fish demon
 
 COPY entrypoint.sh /opt/scripts/entrypoint.sh
+COPY change_repo_to_cn.sh /opt/scripts/change_repo_to_cn.sh
 RUN chmod +x /opt/scripts/*
 
 # 设置构建时的默认 shell
