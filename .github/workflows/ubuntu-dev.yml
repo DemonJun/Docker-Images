@@ -1,23 +1,23 @@
-name: Build and Push Archlinux Image
+name: Build and Push Ubuntu Image
 
 on:
   push:
     branches: [ "main" ]
     paths:
-      - 'archlinux/**'
+      - 'ubuntu/**'
   # Allow manual workflow trigger
   workflow_dispatch:
 
 env:
   # Image name
-  IMAGE_NAME: archlinux
+  IMAGE_NAME: ubuntu
   IMAGE_TAG: dev
   # DockerHub username
   DOCKERHUB_USERNAME: jundemon
 
 
 jobs:
-  build-archlinux:
+  build-ubuntu:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -48,10 +48,10 @@ jobs:
           tags: |
             type=raw,value=${{ env.IMAGE_TAG }}
 
-      - name: Build and push Archlinux Dev image
+      - name: Build and push Ubuntu Dev image
         uses: docker/build-push-action@v5
         with:
-          context: ./archlinux
+          context: ./ubuntu
           platforms: linux/amd64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}

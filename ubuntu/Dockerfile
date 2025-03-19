@@ -1,26 +1,22 @@
-FROM archlinux
+FROM ubuntu:24.10
 
 LABEL maintainer="demonjun@foxmail.com"
 
 ENV LANG=en_US.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Shanghai
 
 USER root
 WORKDIR /root
 
-RUN pacman -Syyu archlinux-keyring --noconfirm && \
-    pacman-key --init && \
-    pacman-key --populate 
-
-RUN echo -e "[archlinuxcn]\nServer = https://repo.archlinuxcn.org/\$arch" >> /etc/pacman.conf && \
-    pacman-key --lsign farseerfc@archlinux.org && \
-    echo "Y" | pacman -Sy archlinuxcn-keyring --noconfirm && \
-    pacman -Syu --noconfirm --needed base-devel curl wget git openssh sudo yay vim fish bash-completion rsync xorg xorg-xauth socat
+# install common tools
+RUN apt-get update && apt-get install -y software-properties-common && \
+    apt-get install -y python3.12 python3-pip curl wget git openssh-server sudo vim fish bash-completion rsync socat tzdata locales && \
+    sed -ie 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' /etc/locale.gen && \
+    locale-gen
 
 # enable ssh
-RUN groupadd demon && useradd -mg root demon && \
-    echo -e "123456\n123456" | passwd root && \
-    echo -e "123456\n123456" | passwd demon && \
-    echo "demon ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers.d/demon && \
+RUN echo "root:123456" | chpasswd && \
     rm -f /etc/ssh/ssh_*_key &&\
     ssh-keygen -A && \
     sed -i \
@@ -36,8 +32,17 @@ RUN groupadd demon && useradd -mg root demon && \
     -e 's/^#*\(Port\) .*/\1 2222/' \
     /etc/ssh/sshd_config
 
-# install docker kubectl helm k9s pgcli
-RUN yay -Sy docker docker-compose docker-buildx python python-pip kubectl helm k9s pgcli --needed --noconfirm 
+# install docker pgcli k9s
+RUN curl -fsSL https://get.docker.com | sh -s -- && \
+    apt-get install -y python-is-python3 pgcli && \
+    curl -sL https://github.com/derailed/k9s/releases/latest/download/k9s_Linux_amd64.tar.gz | tar xz -C /usr/local/bin k9s
+
+# install kubectl helm
+RUN mkdir -p /usr/local/bin && \
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
+    chmod +x kubectl && \
+    mv kubectl /usr/local/bin/ && \
+    curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash 
 
 # install vfox
 RUN curl -sSf https://raw.githubusercontent.com/version-fox/vfox/main/install.sh | bash && \
@@ -48,21 +53,19 @@ RUN curl -sSf https://raw.githubusercontent.com/version-fox/vfox/main/install.sh
 
 # install nodejs java maven using vfox
 RUN vfox install nodejs@23.9.0 ; \
-    vfox install maven@3.9.9 ;\    
     vfox install java@21.0.6+7-tem ; \
     vfox install java@17.0.14+7-tem ; \
-    vfox install java@11.0.26+4-tem
+    vfox install java@11.0.26+4-tem ; \
+    vfox install maven@3.9.9 
 
 # clean cache
-RUN pacman -Scc --noconfirm && \
-    rm -rf .cache    
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # 设置默认 shell 为 fish
-RUN chsh -s /usr/bin/fish root && \
-    chsh -s /usr/bin/fish demon
+RUN chsh -s /usr/bin/fish root
 
 COPY entrypoint.sh /opt/scripts/entrypoint.sh
-COPY change_repo_to_cn.sh /opt/scripts/change_repo_to_cn.sh
 RUN chmod +x /opt/scripts/*
 
 # 设置构建时的默认 shell
