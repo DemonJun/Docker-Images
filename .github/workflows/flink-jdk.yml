@@ -1,0 +1,63 @@
+name: Build and Push flink docker Image
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'flink/**'
+  # Allow manual workflow trigger
+  workflow_dispatch:
+
+env:
+  # Image name
+  IMAGE_NAME: flink
+  # DockerHub username
+  DOCKERHUB_USERNAME: jundemon
+
+
+jobs:
+  build-flink:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        flink_version: ['1.20', '2.0']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ matrix.flink_version }}-jdk-jammy
+            type=raw,value=${{ matrix.flink_version }}
+
+      - name: Build and push Flink image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./flink/${{ matrix.flink_version }}
+          platforms: linux/amd64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max 
