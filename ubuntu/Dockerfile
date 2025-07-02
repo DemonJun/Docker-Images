@@ -73,7 +73,6 @@ RUN chsh -s /usr/bin/fish root && \
     mkdir -p /root/.claude-code-router
 
 COPY docker-entrypoint.sh /opt/scripts/docker-entrypoint.sh
-COPY .tool-versions  /root/.version-fox/.tool-versions
 RUN chmod +x /opt/scripts/*
 
 # 设置构建时的默认 shell
