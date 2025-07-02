@@ -3,12 +3,6 @@
 # 加载环境变量和配置
 source /root/.config/fish/config.fish
 
-cat <<EOF > /root/.version-fox/.tool-versions
-java 17.0.14+7-tem
-maven 3.9.9
-nodejs 20.19.3
-EOF
-
 vfox use java@17.0.14+7-tem -g
 vfox use maven@3.9.9 -g
 vfox use nodejs@20.19.3 -g
