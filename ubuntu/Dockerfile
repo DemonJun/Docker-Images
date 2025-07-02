@@ -60,7 +60,10 @@ RUN vfox install nodejs@24.1.0 ; \
     vfox install maven@3.9.9 
 
 # install claude-code
-RUN ~/.version-fox/cache/nodejs/v-24.1.0/nodejs-24.1.0/bin/npm install -g \
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash; \
+    \. "$HOME/.nvm/nvm.sh" ;\
+    nvm install 20 ; \
+    npm install -g \
     @anthropic-ai/claude-code \
     @musistudio/claude-code-router
 
