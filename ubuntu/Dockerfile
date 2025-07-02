@@ -52,20 +52,28 @@ RUN curl -sSf https://raw.githubusercontent.com/version-fox/vfox/main/install.sh
     vfox add nodejs java maven 
 
 # install nodejs java maven using vfox
-RUN vfox install nodejs@23.9.0 ; \
+RUN vfox install nodejs@24.1.0 ; \
+    vfox install nodejs@20.19.3 ; \
     vfox install java@21.0.6+7-tem ; \
     vfox install java@17.0.14+7-tem ; \
     vfox install java@11.0.26+4-tem ; \
     vfox install maven@3.9.9 
+
+# install claude-code
+RUN ~/.version-fox/cache/nodejs/v-24.1.0/nodejs-24.1.0/bin/npm install -g \
+    @anthropic-ai/claude-code \
+    @musistudio/claude-code-router
 
 # clean cache
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # 设置默认 shell 为 fish
-RUN chsh -s /usr/bin/fish root
+RUN chsh -s /usr/bin/fish root && \
+    mkdir -p /root/.claude-code-router
 
-COPY entrypoint.sh /opt/scripts/entrypoint.sh
+COPY docker-entrypoint.sh /opt/scripts/docker-entrypoint.sh
+COPY .tool-versions  /root/.version-fox/.tool-versions
 RUN chmod +x /opt/scripts/*
 
 # 设置构建时的默认 shell
@@ -74,4 +82,4 @@ SHELL ["/usr/bin/fish", "-c"]
 EXPOSE 2222 8080
 ENV ENABLE_SSH=false
 
-ENTRYPOINT ["/opt/scripts/entrypoint.sh"]
+ENTRYPOINT ["/opt/scripts/docker-entrypoint.sh"]
