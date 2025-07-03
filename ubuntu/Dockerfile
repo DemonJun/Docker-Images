@@ -11,7 +11,7 @@ WORKDIR /root
 
 # install common tools
 RUN apt-get update && apt-get install -y software-properties-common && \
-    apt-get install -y python3.12 python3-pip curl wget git openssh-server sudo vim fish bash-completion rsync socat tzdata locales && \
+    apt-get install -y python3.12 python3-pip curl wget git openssh-server sudo vim fish bash-completion rsync socat tzdata locales unzip && \
     sed -ie 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' /etc/locale.gen && \
     locale-gen
 
