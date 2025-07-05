@@ -2,10 +2,10 @@ FROM metacubex/mihomo
 
 LABEL maintainer="demonjun@foxmail.com"
 
-ENV url ""
-ENV filter "*"
-ENV ipv6 true
-ENV udp true
+ENV url=""
+ENV filter="*"
+ENV ipv6=true
+ENV udp=true
 
 COPY clash.yaml /clash.yaml
 COPY docker-entrypoint.sh /docker-entrypoint.sh
