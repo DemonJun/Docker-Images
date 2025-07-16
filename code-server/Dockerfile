@@ -11,6 +11,9 @@ ENV LANG=en_US.UTF-8 \
     NODE_HOME=/usr/local/nodejs
 ENV PATH=$JAVA_HOME/bin:$MAVEN_HOME/bin:$NODE_HOME/bin:$PATH
 
+# Override user and group for linuxserver.io base image
+ENV PUID=0     PGID=0
+
 USER root
 WORKDIR /root
 
