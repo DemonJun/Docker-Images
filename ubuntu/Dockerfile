@@ -56,12 +56,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends     # System ut
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/*
 
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh 
-RUN chmod +x /usr/local/bin/entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh 
+RUN chmod +x /entrypoint.sh
 
 # Set default shell to fish
 SHELL ["/usr/bin/fish", "-c"]
 
 # Expose SSH port
 EXPOSE 2222
-ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
+ENTRYPOINT [ "/entrypoint.sh" ]
