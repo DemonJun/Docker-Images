@@ -1,4 +1,4 @@
-FROM lscr.io/linuxserver/code-server
+FROM ubuntu:24.04
 
 LABEL maintainer="demonjun@foxmail.com"
 
@@ -8,19 +8,18 @@ ENV LANG=en_US.UTF-8 \
     TZ=Asia/Shanghai \
     JAVA_HOME=/usr/local/java \
     MAVEN_HOME=/usr/local/maven \
-    NODE_HOME=/usr/local/nodejs
+    NODE_HOME=/usr/local/nodejs  \
+    ENABLE_SSH=true 
 ENV PATH=$JAVA_HOME/bin:$MAVEN_HOME/bin:$NODE_HOME/bin:$PATH
-
-# Override user and group for linuxserver.io base image
-ENV PUID=0     PGID=0
 
 USER root
 WORKDIR /root
 
 # Install all dependencies, tools, and clean up in a single layer
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    # System utilities
-    software-properties-common python3.12 python3-pip curl wget git openssh-client sudo vim fish bash-completion rsync socat tzdata locales unzip ca-certificates gpg python-is-python3 pgcli xz-utils && \
+RUN apt-get update && apt-get install -y --no-install-recommends     # System utilities    software-properties-common python3.12 python3-pip curl wget git openssh-client sudo vim fish bash-completion rsync socat tzdata locales unzip ca-certificates gpg python-is-python3 pgcli xz-utils openssh-server &&     \
+    # --- Configure SSH Server ---   
+    echo 'root:root' | chpasswd && \
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
     # --- Configure locale ---
     sed -ie 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' /etc/locale.gen && \
     locale-gen && \
@@ -57,5 +56,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/*
 
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh 
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 # Set default shell to fish
 SHELL ["/usr/bin/fish", "-c"]
+
+# Expose SSH port
+EXPOSE 22
+ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
