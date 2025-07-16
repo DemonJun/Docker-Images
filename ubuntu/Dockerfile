@@ -16,8 +16,14 @@ USER root
 WORKDIR /root
 
 # Install all dependencies, tools, and clean up in a single layer
-RUN apt-get update && apt-get install -y --no-install-recommends     # System utilities    software-properties-common python3.12 python3-pip curl wget git openssh-client sudo vim fish bash-completion rsync socat tzdata locales unzip ca-certificates gpg python-is-python3 pgcli xz-utils openssh-server &&     \
-    # --- Configure SSH Server ---   
+RUN apt-get update && apt-get install -y --no-install-recommends  \
+    # System utilities    \
+    software-properties-common python3.12 python3-pip curl wget git openssh-client sudo vim fish bash-completion rsync socat tzdata locales unzip ca-certificates gpg python-is-python3 pgcli xz-utils openssh-server  && \
+    # --- Final Setup & Cleanup ---
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/*
+
+RUN # --- Configure SSH Server ---   \ 
     echo 'root:root' | chpasswd && \
     sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config &&     sed -i 's/#Port 22/Port 2222/' /etc/ssh/sshd_config && \
     # --- Configure locale ---
@@ -51,17 +57,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends     # System ut
     tar -xJf /tmp/node.tar.xz -C /usr/local/nodejs --strip-components=1 && \
     npm install -g npm@11.4.2 && \
     # --- Install Global Node Packages ---
-    npm install -g @anthropic-ai/claude-code @musistudio/claude-code-router && \
-    # --- Final Setup & Cleanup ---
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/*
+    npm install -g @anthropic-ai/claude-code @musistudio/claude-code-router
 
-COPY entrypoint.sh /entrypoint.sh 
+
+COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Set default shell to fish
-SHELL ["/usr/bin/fish", "-c"]
+SHELL ["/usr/bin/fish"]
+# Set default working directory 
+WORKDIR /root
 
 # Expose SSH port
 EXPOSE 2222
-ENTRYPOINT [ "/entrypoint.sh" ]
+ENTRYPOINT ["/entrypoint.sh"]
