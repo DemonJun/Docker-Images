@@ -17,7 +17,7 @@ WORKDIR /root
 # Install all dependencies, tools, and clean up in a single layer
 RUN apt-get update && apt-get install -y --no-install-recommends \
     # System utilities
-    software-properties-common python3.12 python3-pip curl wget git openssh-client sudo vim fish bash-completion rsync socat tzdata locales unzip ca-certificates gpg python-is-python3 pgcli && \
+    software-properties-common python3.12 python3-pip curl wget git openssh-client sudo vim fish bash-completion rsync socat tzdata locales unzip ca-certificates gpg python-is-python3 pgcli xz-utils && \
     # --- Configure locale ---
     sed -ie 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' /etc/locale.gen && \
     locale-gen && \
