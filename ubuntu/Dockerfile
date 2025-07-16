@@ -1,4 +1,4 @@
-FROM ubuntu:24.10
+FROM lscr.io/linuxserver/code-server
 
 LABEL maintainer="demonjun@foxmail.com"
 
@@ -49,7 +49,8 @@ RUN curl -sSf https://raw.githubusercontent.com/version-fox/vfox/main/install.sh
     echo 'eval "$(vfox activate bash)"' >> /root/.bashrc && \
     mkdir -p /root/.config/fish && \
     echo 'vfox activate fish | source' >> /root/.config/fish/config.fish; \
-    vfox add nodejs java maven 
+    vfox add nodejs java maven && \
+    chsh -s /usr/bin/fish root   
 
 # install nodejs java maven using vfox
 RUN vfox install nodejs@24.1.0 ; \
@@ -60,10 +61,8 @@ RUN vfox install nodejs@24.1.0 ; \
     vfox install maven@3.9.9 
 
 # install claude-code
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash; \
-    \. "$HOME/.nvm/nvm.sh" ;\
-    nvm install 20 ; \
-    npm install -g \
+RUN /root/.version-fox/cache/nodejs/v-24.1.0/nodejs-24.1.0/bin/npm \
+    install -g \
     @anthropic-ai/claude-code \
     @musistudio/claude-code-router
 
@@ -72,17 +71,7 @@ RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # 设置默认 shell 为 fish
-RUN chsh -s /usr/bin/fish root && \
+RUN  && \
     mkdir -p /root/.claude-code-router
 
-COPY docker-entrypoint.sh /opt/scripts/docker-entrypoint.sh
 COPY tool-versions /root/.version-fox/.tool-versions
-RUN chmod +x /opt/scripts/*
-
-# 设置构建时的默认 shell
-SHELL ["/usr/bin/fish", "-c"]
-
-EXPOSE 2222 8080
-ENV ENABLE_SSH=false
-
-ENTRYPOINT ["/opt/scripts/docker-entrypoint.sh"]
