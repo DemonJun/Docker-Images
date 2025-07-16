@@ -39,8 +39,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.14+7/OpenJDK17U-jdk_x64_linux_hotspot_17.0.14_7.tar.gz -O /tmp/jdk.tar.gz && \
     mkdir -p /usr/local/java && \
     tar -xzf /tmp/jdk.tar.gz -C /usr/local/java --strip-components=1 && \
-    # Maven 3.9.9
-    wget https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz -O /tmp/maven.tar.gz && \
+    # Maven 3.9.11
+    wget https://dlcdn.apache.org/maven/maven-3/3.9.11/binaries/apache-maven-3.9.11-bin.tar.gz -O /tmp/maven.tar.gz && \
     mkdir -p /usr/local/maven && \
     tar -xzf /tmp/maven.tar.gz -C /usr/local/maven --strip-components=1 && \
     # Node.js 24.1.0
