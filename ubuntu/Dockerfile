@@ -19,7 +19,7 @@ WORKDIR /root
 RUN apt-get update && apt-get install -y --no-install-recommends     # System utilities    software-properties-common python3.12 python3-pip curl wget git openssh-client sudo vim fish bash-completion rsync socat tzdata locales unzip ca-certificates gpg python-is-python3 pgcli xz-utils openssh-server &&     \
     # --- Configure SSH Server ---   
     echo 'root:root' | chpasswd && \
-    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config &&     sed -i 's/#Port 22/Port 2222/' /etc/ssh/sshd_config && \
     # --- Configure locale ---
     sed -ie 's/^#\(en_US\.UTF-8 UTF-8\)/\1/' /etc/locale.gen && \
     locale-gen && \
@@ -63,5 +63,5 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 SHELL ["/usr/bin/fish", "-c"]
 
 # Expose SSH port
-EXPOSE 22
+EXPOSE 2222
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
