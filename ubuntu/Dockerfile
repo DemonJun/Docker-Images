@@ -44,34 +44,39 @@ RUN mkdir -p /usr/local/bin && \
     mv kubectl /usr/local/bin/ && \
     curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash 
 
-# install vfox
-RUN curl -sSf https://raw.githubusercontent.com/version-fox/vfox/main/install.sh | bash && \
-    echo 'eval "$(vfox activate bash)"' >> /root/.bashrc && \
-    mkdir -p /root/.config/fish && \
-    echo 'vfox activate fish | source' >> /root/.config/fish/config.fish; \
-    vfox add nodejs java maven && \
-    chsh -s /usr/bin/fish root   
+# install Eclipse Temurin JDK 17
+RUN apt-get install -y ca-certificates && \
+    mkdir -p /etc/apt/keyrings && \
+    wget -O - https://packages.eclipse.org/keys/adoptium.asc | gpg --dearmor -o /etc/apt/keyrings/adoptium.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/adoptium.gpg] https://packages.eclipse.org/artifactory/deb $(. /etc/os-release && echo $VERSION_CODENAME) main" | tee /etc/apt/sources.list.d/adoptium.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y temurin-17-jdk
 
-# install nodejs java maven using vfox
-RUN vfox install nodejs@24.1.0 ; \
-    vfox install nodejs@20.19.3 ; \
-    vfox install java@21.0.6+7-tem ; \
-    vfox install java@17.0.14+7-tem ; \
-    vfox install java@11.0.26+4-tem ; \
-    vfox install maven@3.9.9 
+# install maven
+RUN wget https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz && \
+    tar -xvf apache-maven-3.9.9-bin.tar.gz && \
+    rm apache-maven-3.9.9-bin.tar.gz && \
+    mv apache-maven-3.9.9 /usr/local/maven
+
+# install nodejs
+RUN wget https://nodejs.org/dist/v24.1.0/node-v24.1.0-linux-x64.tar.xz && \
+    tar -xvf node-v24.1.0-linux-x64.tar.xz && \
+    rm node-v24.1.0-linux-x64.tar.xz && \
+    mv node-v24.1.0-linux-x64 /usr/local/nodejs
+
+# set env
+ENV JAVA_HOME=/usr/lib/jvm/temurin-17-jdk-amd64
+ENV MAVEN_HOME=/usr/local/maven
+ENV NODE_HOME=/usr/local/nodejs
+ENV PATH=$JAVA_HOME/bin:$MAVEN_HOME/bin:$NODE_HOME/bin:$PATH
 
 # install claude-code
-RUN /root/.version-fox/cache/nodejs/v-24.1.0/nodejs-24.1.0/bin/npm \
-    install -g \
-    @anthropic-ai/claude-code \
-    @musistudio/claude-code-router
+RUN npm install -g @anthropic-ai/claude-code @musistudio/claude-code-router
 
 # clean cache
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # 设置默认 shell 为 fish
-RUN  && \
-    mkdir -p /root/.claude-code-router
+SHELL ["/usr/bin/fish", "-c"]
 
-COPY tool-versions /root/.version-fox/.tool-versions
