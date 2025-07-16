@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/fish
 
 # 如果 ENABLE_SSH 为 true，则启动 SSH 服务
 if test "$ENABLE_SSH" = "true"
