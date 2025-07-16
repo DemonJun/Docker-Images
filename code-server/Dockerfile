@@ -47,6 +47,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget https://nodejs.org/dist/v24.1.0/node-v24.1.0-linux-x64.tar.xz -O /tmp/node.tar.xz && \
     mkdir -p /usr/local/nodejs && \
     tar -xJf /tmp/node.tar.xz -C /usr/local/nodejs --strip-components=1 && \
+    npm install -g npm@11.4.2 && \
     # --- Install Global Node Packages ---
     npm install -g @anthropic-ai/claude-code @musistudio/claude-code-router && \
     # --- Final Setup & Cleanup ---

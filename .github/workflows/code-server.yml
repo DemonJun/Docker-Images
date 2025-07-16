@@ -1,23 +1,22 @@
-name: Build and Push Ubuntu Image
+name: Build and Push Code server Image
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
-      - 'ubuntu/**'
+      - "code-server/**"
   # Allow manual workflow trigger
   workflow_dispatch:
 
 env:
   # Image name
-  IMAGE_NAME: ubuntu
+  IMAGE_NAME: code-server
   IMAGE_TAG: dev
   # DockerHub username
   DOCKERHUB_USERNAME: jundemon
 
-
 jobs:
-  build-ubuntu:
+  build-code-server:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -48,13 +47,13 @@ jobs:
           tags: |
             type=raw,value=${{ env.IMAGE_TAG }}
 
-      - name: Build and push Ubuntu Dev image
+      - name: Build and push code-server Dev image
         uses: docker/build-push-action@v5
         with:
-          context: ./ubuntu
+          context: ./code-server
           platforms: linux/amd64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max 
+          cache-to: type=gha,mode=max
