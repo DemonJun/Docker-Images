@@ -1,4 +1,4 @@
-name: Build and Push Ubuntu Image
+name: Build and Push Centos Image
 
 on:
   push:
@@ -16,7 +16,7 @@ env:
   DOCKERHUB_USERNAME: jundemon
 
 jobs:
-  build-ubuntu:
+  build-centos:
     runs-on: ubuntu-latest
     permissions:
       contents: read
